@@ -1,0 +1,67 @@
+                                              y1=: 0.00001000
+                                             ER1=: 1.08000000
+                                  ratio_FlowWall=:        4
+                                            l_bc=: 0.50000000
+                                    y_goal_input=: 0.00892000
+                                   y_goal_origin=: 0.00877193
+                                      y_goal_now=: 0.00505051
+                                      lv_Uniform=:        3
+                                      n_PntOvrlp=:        3
+                                n_PntFlowUniform=:      105
+                                   wall_Position=: 0.50000000
+-----------------------------------------------------------------
+                               Index of  block,I=:        1
+                Grid level in this block,lv_Grid=:       -7
+          First layer thickness in this block,y1=: 0.00001000
+           Last layer thickness in this block,yn=: 0.00003906
+          No. points in flow direction,n_PntFlow=:    12801
+    No. points in wall normal direction,n_GrdLyr=:       25
+                Expansion ratio in this block,ER=: 1.05841322
+Total thickness due in this block,thcknss_TotDue=: 0.00053654
+                   Block boundary position,wall-=: 0.49946346
+                   Block boundary position,wall+=: 0.50053654
+-----------------------------------------------------------------
+                               Index of  block,I=:        2
+                Grid level in this block,lv_Grid=:       -5
+          First layer thickness in this block,y1=: 0.00004134
+           Last layer thickness in this block,yn=: 0.00015625
+          No. points in flow direction,n_PntFlow=:     3200
+    No. points in wall normal direction,n_GrdLyr=:       25
+                Expansion ratio in this block,ER=: 1.05696339
+Total thickness due in this block,thcknss_TotDue=: 0.00271003
+                   Block boundary position,wall-=: 0.49728997
+                   Block boundary position,wall+=: 0.50271003
+-----------------------------------------------------------------
+                               Index of  block,I=:        3
+                Grid level in this block,lv_Grid=:       -3
+          First layer thickness in this block,y1=: 0.00016515
+           Last layer thickness in this block,yn=: 0.00062578
+          No. points in flow direction,n_PntFlow=:      799
+    No. points in wall normal direction,n_GrdLyr=:       33
+                Expansion ratio in this block,ER=: 1.04250819
+Total thickness due in this block,thcknss_TotDue=: 0.01417212
+                   Block boundary position,wall-=: 0.48582788
+                   Block boundary position,wall+=: 0.51417212
+-----------------------------------------------------------------
+                               Index of  block,I=:        4
+                Grid level in this block,lv_Grid=:       -1
+          First layer thickness in this block,y1=: 0.00065238
+           Last layer thickness in this block,yn=: 0.00251256
+          No. points in flow direction,n_PntFlow=:      199
+    No. points in wall normal direction,n_GrdLyr=:       41
+                Expansion ratio in this block,ER=: 1.03428531
+Total thickness due in this block,thcknss_TotDue=: 0.07094057
+                   Block boundary position,wall-=: 0.42905943
+                   Block boundary position,wall+=: 0.57094057
+-----------------------------------------------------------------
+                               Index of  block,I=:        5
+                Grid level in this block,lv_Grid=:        0
+          First layer thickness in this block,y1=: 0.00259871
+           Last layer thickness in this block,yn=: 0.00505051
+          No. points in flow direction,n_PntFlow=:       99
+    No. points in wall normal direction,n_GrdLyr=:       25
+                Expansion ratio in this block,ER=: 1.02807326
+Total thickness due in this block,thcknss_TotDue=: 0.16332678
+                   Block boundary position,wall-=: 0.33667322
+                   Block boundary position,wall+=: 0.66332678
+-----------------------------------------------------------------

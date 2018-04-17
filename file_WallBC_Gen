@@ -1,0 +1,17 @@
+#-1 First layer hight 		 	-> y1:
+	1d-5
+#-2 Expansion ratio (<=1.2)  		-> ER:
+	1.08
+#-3 Aspect ratio (<=5)		 	-> ratio_FlowWall:
+	4
+#-4 Boundary length			-> l_bc:
+	0.5
+#-5 Max uniform mesh size		-> y_goal:
+	0.00892
+#-6 No. uniform mesh gird levlels	-> lv_Uniform:
+	3
+#-7 No. of overlaping points (>=3)	-> n_PntOvrlp:
+	3
+#-8 Position of wall			-> wall_Position:
+	0.5
+
