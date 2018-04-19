@@ -1,0 +1,102 @@
+#!MC 1410
+$!VarSet |MFBD| = '/home/tangxl/wb2-c2p2/mesh'
+$!PICK ADDATPOSITION
+  X = 6.76361655773
+  Y = 3.57026143791
+  CONSIDERSTYLE = YES
+$! LOOP 100
+$!VarSet|IDMAP|=((|LOOP|-1)*20+1)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = RED}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+2)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = YELLOW}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+3)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = GREEN}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+4)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = CYAN}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+5)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = BLUE}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+6)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = PURPLE}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+7)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = CUSTOM1}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+8)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = CUSTOM2}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+9)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = CUSTOM3}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+10)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = CUSTOM4}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+11)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = CUSTOM5}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+12)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = CUSTOM6}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+13)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = CUSTOM7}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+14)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = CUSTOM8}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+15)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = CUSTOM9}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+16)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = CUSTOM10}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+17)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = CUSTOM11}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+18)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = CUSTOM12}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+19)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = CUSTOM13}
+$!VarSet|IDMAP|=((|LOOP|-1)*20+20)
+$!FIELDMAP [|IDMAP|]  MESH{COLOR = CUSTOM14}
+$! ENDLOOP
+# Draw wall line
+$!PICK SETMOUSEMODE
+  MOUSEMODE = SELECT
+$!ATTACHGEOM 
+  ANCHORPOS
+    {
+    X = -0.500
+    Y = 0.500
+    }
+  LINETHICKNESS = 0.4
+  RAWDATA
+# List of point put
+1
+2
+# x,y increment of each point put
+0 0 
+1.0 -0.0
+#----------------------------------------------------------------------
+# Draw position of source
+$!VarSet |N_RING|=10
+$!VarSet |RADIUS|=0.5
+$!VarSet |R_STEP|=(|RADIUS|/(|N_RING|-1))
+$!VarSet |R_SRC|=0.05
+$!VarSet |X|=0.0
+$!VarSet |Y|=0.0
+$!ATTACHGEOM 
+  GEOMTYPE = CIRCLE
+  ANCHORPOS
+    {
+    X = |X|
+    Y = |Y|
+    }
+  LINETHICKNESS = 0.2
+  ISFILLED = YES
+  FILLCOLOR = BLACK
+  RAWDATA
+|R_SRC|
+$!LOOP |N_RING|
+$!VarSet |R_SRC|=(((|LOOP|-1)*|R_STEP|))
+$!ATTACHGEOM 
+  GEOMTYPE = CIRCLE
+  ANCHORPOS
+    {
+    X = |X|
+    Y = |Y|
+    }
+  LINETHICKNESS = 0.2
+  LINEPATTERN = DOTTED
+  RAWDATA
+|R_SRC|
+$!ENDLOOP
+#----------------------------------------------------------------------
+$!REDRAWALL 
+$!RemoveVar |MFBD|
