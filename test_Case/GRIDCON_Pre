@@ -1,0 +1,156 @@
+#1------case dimension(cas_Dim):
+	2D
+#2------mesh type(mesh_Type):
+	cfx4
+#3------total super blocks(n_BlkSupPre):
+	1
+#4------number of original blocks in each super block:
+	i_BlkSupPre	n_Blk(i_BlkSupPre)
+	1		18
+#5------grid Levels of uniform mesh in each super block:
+	Super Block:1
+	Lv_uniform(x)	(y)	(z)
+		0	0	0
+#5-2 ----No. Level of global coarsen,Lv_CoarsenGlb
+	0
+#6-----1) boundary conditions and grid-level offsets of wall blocks & grid-coarsen
+-------2) level of each original block:
+-------3) 2000=PML,3000=AXISYMMETRY,4000=FAR-FIELD?,7000=WALL,8000=SOURCE,9000=FLUID
+-------4) boundary condition:isidtp_Pre(1:6,i_Blk,i_BlkSupPre),5:6 for 3D cases
+-------5) grid-level offset:Lv_offset(1:3,i_Blk,i_BlkSupPre)
+-------6) grid-level coarsen:Lv_coarsen(1:3,i_Blk,i_BlkSupPre)
+-------7) if the uniform mesh is created on Lv_uniform=8 with size dx, the min size 
+-------8) is then dx/2^8
+-------9) Lv_Uniform(*)+Lv_uniOffset(*)+Lv_coarsen(*)=Lv_Final(*)
+------10) Lv_OffUniform(*)=Lv_uniOffset(*)+Lv_coarsen(*),  which is the coarsening
+------11) Lv based on Lv_Uniform(*)
+i_Blk	isid*1	2	3	4	5	6 Lv_offset(x)	(y)	(z) Lv_cs(x)	(y)	(z)
+1	4000	9000	7000	9000	0	0	0	0	0	0	0	0
+2	9000	9000	7000	9000	0	0	0	0	0	0	0	0
+3	9000	9000	7000	7000	0	0	0	0	0	0	0	0
+4	9000	9000	7000	7000	0	0	0	0	0	0	0	0
+5	9000	9000	7000	9000	0	0	0	0	0	0	0	0
+6	9000	4000	7000	9000	0	0	0	0	0	0	0	0
+7	4000	9000	9000	9000	0	0	0	0	0	0	0	0
+8	9000	9000	9000	9000	0	0	0	0	0	0	0	0
+9	9000	9000	7000	9000	0	0	0	0	0	0	0	0
+10	9000	9000	7000	9000	0	0	0	0	0	0	0	0
+11	9000	9000	9000	9000	0	0	0	0	0	0	0	0
+12	9000	4000	9000	9000	0	0	0	0	0	0	0	0
+13	4000	9000	9000	4000	0	0	0	0	0	0	0	0
+14	9000	9000	9000	4000	0	0	0	0	0	0	0	0
+15	9000	9000	9000	4000	0	0	0	0	0	0	0	0
+16	9000	9000	9000	4000	0	0	0	0	0	0	0	0
+17	9000	9000	9000	4000	0	0	0	0	0	0	0	0
+18	9000	4000	9000	4000	0	0	0	0	0	0	0	0
+#7----- block matrix in super block
+------- 1) In each super block, blocks must be arranged in matrix
+------- 2) Index of block must be numbered by:
+------- 3) idx_Blk(I,J,K)=(K-1)*II_Blk*JJ_Blk+(J-1)*II_Blk+I
+Super Block:1
+II_Blk	JJ_Blk	KK_Blk
+6	3	1
+#8----- number of overlapping points: 3*2^max_LvDiff+3*2^Lv_CoarsenGlb<=6+6 due to max_LvDiff<=1 recommended.
+	12
+#9----- flag of multi-time-step or not, flag_Mltstp=1: use multi-time-step
+	0
+#10---- No. CPUs plan to use, np.
+	30
+#11---- ratio_PointAftPre,ratio of array size between after processing and pre-processing
+	20
+#12---- flag of more split than initial balance or not, 1 = more split, 0 = no more
+	0
+#13---- No. of extra splits activated by flag_MoreSplit=1. <=4 by now.
+	0
+!-----------------------------------------------------------------------!
+Max interface on a single edge/surface, max_GlueInBlk
+i_BlkSup	max_GlueInBlk(i_BlkSup)
+!-----------------------------------------------------------------------!
+1		1
+!-----------------------------------------------------------------------!
+1) Block interface info. neigbr_Blk(i_Blk,1:6,max_GlueInBlk)
+2) 1:6 means 6 faces of 3D block, 4 edges of 2D block
+3) if there's no neigbour on edge/surface i=1,6 then neigbr_Blk(*,i,*)=0
+4) if there're 2 neigbours, 18 and 19, on the same edge/surface
+5) then neigbr_Blk(*,i,1)=2,neigbr_Blk(*,i,2)=18,neigbr_Blk(*,i,3)=19,neigbr_Blk(*,i,4:max)=0
+!-----------------------------------------------------------------------!
+i_BlkSup = 1:
+i_Blk	No. of neigbours n_neigbrLocPre(i_BlkSup,i_Blk)
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+i_Blk	Index of edge/surfaces 1:6=left,right,down,up,bottom,top
+	1	2	3	4	5	6
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+i_BlkSup = 2:
+i_Blk	No. of neigbours
+1	1
+2	2
+3	2
+4	2
+5	2
+6	2
+7	1
+8	2
+9	3
+10	3
+11	3
+12	3
+13	3
+14	2
+15	3
+16	4
+17	5
+18	5
+19	3
+20	2
+21	3
+22	3
+23	3
+24	2
+i_Blk	Index of edge/surfaces 1:6=left,right,down,up,bottom,top. neigbr_BlkPre((max_Colum,max_BlkGlbPre,n_BlkSupPre)
+	1	2	3	4	5	6
+1	0	1 2	0	0	0	0
+2	1 1	1 3	0	0	0	0
+3	1 2	1 4	0	0	0	0	
+4	1 3	1 5	0	0	0	0	
+5	1 4	1 6	0	0	0	0
+6	1 5	1 7	0	0	0	0
+7	1 6	0	0	0	0	0
+8	0	1 9	0	1 15	0	0	
+9	1 8	1 10	0	1 16	0	0
+10	1 9	1 11	0	1 17	0	0
+11	1 10	1 12	0	1 17	0	0
+12	1 11	1 13	0	1 18	0	0
+13	1 12	1 14	0	1 18	0	0
+14	1 13	0	0	1 19	0	0
+15	0	1 16	1 8	1 20	0	0
+16	1 15	1 17	1 9	1 21	0	0
+17	1 16	1 18	2 10 11	1 22	0	0
+18	1 17	1 19	2 12 13	1 23	0	0
+19	1 18	0	1 14	1 24	0	0
+20	0	1 21	1 15	0	0	0
+21	1 20	1 23	1 16	0	0	0
+22	1 21	1 23	1 17	0	0	0
+23	1 22	1 24	1 18	0	0	0
+24	1 23	0	1 19	0	0	0
