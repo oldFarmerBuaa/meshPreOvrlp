@@ -1,3 +1,5 @@
 Update log of 2.0 from 1.0
 
-1) Overlap strategy changed from overall I-J-K swiping to local (BLOCK by BLOCK) I-J-K swiping, add property 'dir_Swp(4/6,II_Blk,JJ_Blk,KK_Blk)', and overlap in each block from bc=1 to 4/6.
+1) Overall strategy is fixed to overlap first and then do leaping.
+2) Overlap strategy has two choices: 2 direction swipe for wall in fluid 
+                                  or 1 direction swipe for no-wall in fluid

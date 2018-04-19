@@ -26,14 +26,10 @@ USE block_overlaping
 USE block_splitting
 !
 IMPLICIT NONE
-INTEGER flag_Strategy
 
 20 FORMAT(A80)
 WRITE(*,20) "=============================== Processing Started ========&
              ====================="
-WRITE(*,20) "Input strategy, 1 = Ovrlp-Leap, 2 = Leap-Overlap...........&
-             ....................."
-READ(*,*) flag_Strategy
 WRITE(*,20) "Input overlap pattern, 1 = One-Direction, 2 = Two-Direction&
              ....................."
 READ(*,*) f_Ovrlp1Or2Dir
@@ -55,169 +51,84 @@ CALL output_Grid(II_Pre,JJ_Pre,KK_Pre,&
 !-----------------------------------------------------------------------!
 !   Perform mesh overlapping --- 1	    	 		        !
 !-----------------------------------------------------------------------!
-IF(flag_Strategy==1) THEN
-  WRITE(*,20) "===========================================================&
-               ====================="
-  WRITE(*,20) "Start to overlap...........................................&
-               ....................."
-  II_toOvrlp=II_Pre
-  JJ_toOvrlp=JJ_Pre
-  KK_toOvrlp=KK_Pre
-  X_toOvrlp=X_Pre
-  Y_toOvrlp=Y_Pre
-  Z_toOvrlp=Z_Pre
-  n_PntToOvrlp=n_PointPre
-  IF (f_Ovrlp1Or2Dir==1) THEN
-  CALL perform_BlkOverlap1(1)
+WRITE(*,20) "===========================================================&
+             ====================="
+WRITE(*,20) "Start to overlap...........................................&
+             ....................."
+II_toOvrlp=II_Pre
+JJ_toOvrlp=JJ_Pre
+KK_toOvrlp=KK_Pre
+X_toOvrlp=X_Pre
+Y_toOvrlp=Y_Pre
+Z_toOvrlp=Z_Pre
+n_PntToOvrlp=n_PointPre
+IF (f_Ovrlp1Or2Dir==1) THEN
+CALL perform_BlkOverlap1(1)
+CALL output_Grid(II_PntOvrlp,JJ_PntOvrlp,KK_PntOvrlp,&
+                 X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
+WRITE(*,20) "Overlap in I direction.....................................&
+             .................Done"
+CALL perform_BlkOverlap1(2)
+CALL output_Grid(II_PntOvrlp,JJ_PntOvrlp,KK_PntOvrlp,&
+                 X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
+WRITE(*,20) "Overlap in J direction.....................................&
+             .................Done"
+IF(cas_Dim=="3D") THEN
+  CALL perform_BlkOverlap1(3)
   CALL output_Grid(II_PntOvrlp,JJ_PntOvrlp,KK_PntOvrlp,&
-                   X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
-  WRITE(*,20) "Overlap in I direction.....................................&
-               .................Done"
-  CALL perform_BlkOverlap1(2)
+                 X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
+WRITE(*,20) "Overlap in K direction.....................................&
+             .................Done"
+ENDIF
+ELSEIF (f_Ovrlp1Or2Dir==2) THEN
+CALL perform_BlkOverlap2(1)
+CALL output_Grid(II_PntOvrlp,JJ_PntOvrlp,KK_PntOvrlp,&
+                 X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
+WRITE(*,20) "Overlap in I direction.....................................&
+             .................Done"
+CALL perform_BlkOverlap2(2)
+CALL output_Grid(II_PntOvrlp,JJ_PntOvrlp,KK_PntOvrlp,&
+                 X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
+WRITE(*,20) "Overlap in J direction.....................................&
+             .................Done"
+IF(cas_Dim=="3D") THEN
+  CALL perform_BlkOverlap2(3)
   CALL output_Grid(II_PntOvrlp,JJ_PntOvrlp,KK_PntOvrlp,&
-                   X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
-  WRITE(*,20) "Overlap in J direction.....................................&
-               .................Done"
-  IF(cas_Dim=="3D") THEN
-    CALL perform_BlkOverlap1(3)
-    CALL output_Grid(II_PntOvrlp,JJ_PntOvrlp,KK_PntOvrlp,&
-                   X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
-  WRITE(*,20) "Overlap in K direction.....................................&
-               .................Done"
-  ENDIF
-  ELSEIF (f_Ovrlp1Or2Dir==2) THEN
-  CALL perform_BlkOverlap2(1)
-  CALL output_Grid(II_PntOvrlp,JJ_PntOvrlp,KK_PntOvrlp,&
-                   X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
-  WRITE(*,20) "Overlap in I direction.....................................&
-               .................Done"
-  CALL perform_BlkOverlap2(2)
-  CALL output_Grid(II_PntOvrlp,JJ_PntOvrlp,KK_PntOvrlp,&
-                   X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
-  WRITE(*,20) "Overlap in J direction.....................................&
-               .................Done"
-  IF(cas_Dim=="3D") THEN
-    CALL perform_BlkOverlap2(3)
-    CALL output_Grid(II_PntOvrlp,JJ_PntOvrlp,KK_PntOvrlp,&
-                   X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
-  WRITE(*,20) "Overlap in K direction.....................................&
-               .................Done"
-  ENDIF
-  ENDIF
+                 X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
+WRITE(*,20) "Overlap in K direction.....................................&
+             .................Done"
+ENDIF
+ENDIF
 !-----------------------------------------------------------------------!
 !    Perform mesh point leaping	--- 1					!
 !-----------------------------------------------------------------------!
-  WRITE(*,20) "===========================================================&
-               ====================="
-  WRITE(*,20) "Start to perform point leapping............................&
-               ....................."
-  II_toLP=II_PntOvrlp
-  JJ_toLP=JJ_PntOvrlp
-  KK_toLP=KK_PntOvrlp
-  X_toLP=X_Overlap
-  Y_toLP=Y_Overlap
-  Z_toLP=Z_Overlap
-  CALL perform_PntLeap
-  CALL output_Grid(II_PntLP,JJ_PntLP,KK_PntLP,&
-                 X_Leap,Y_Leap,Z_Leap,"_PNTLP")
+WRITE(*,20) "===========================================================&
+             ====================="
+WRITE(*,20) "Start to perform point leapping............................&
+             ....................."
+II_toLP=II_PntOvrlp
+JJ_toLP=JJ_PntOvrlp
+KK_toLP=KK_PntOvrlp
+X_toLP=X_Overlap
+Y_toLP=Y_Overlap
+Z_toLP=Z_Overlap
+CALL perform_PntLeap
+CALL output_Grid(II_PntLP,JJ_PntLP,KK_PntLP,&
+               X_Leap,Y_Leap,Z_Leap,"_PNTLP")
 !-----------------------------------------------------------------------!
 !   Perform mesh block splitting --- 1	    	 		        !
 !-----------------------------------------------------------------------!
-  WRITE(*,20) "===========================================================&
-               ====================="
-  WRITE(*,20) "Start to perform block splitting...........................&
-               ....................."
-  II_toSplit=II_PntLP
-  JJ_toSplit=JJ_PntLP
-  KK_toSplit=KK_PntLP
-  X_toSplit=X_Leap
-  Y_toSplit=Y_Leap
-  Z_toSplit=Z_Leap
-  CALL perform_BlkSplit
-ENDIF
-!-----------------------------------------------------------------------!
-!    Perform mesh point leaping	--- 2					!
-!-----------------------------------------------------------------------!
-IF(flag_Strategy==2) THEN
-  WRITE(*,20) "===========================================================&
-               ====================="
-  WRITE(*,20) "Start to perform point leapping............................&
-               ....................."
-  II_toLP=II_Pre
-  JJ_toLP=JJ_Pre
-  KK_toLP=KK_Pre
-  X_toLP=X_Pre
-  Y_toLP=Y_Pre
-  Z_toLP=Z_Pre
-  CALL perform_PntLeap
-  CALL output_Grid(II_PntLP,JJ_PntLP,KK_PntLP,&
-                   X_Leap,Y_Leap,Z_Leap,"_PNTLP")
-!-----------------------------------------------------------------------!
-!   Perform mesh overlapping --- 2	    	 		        !
-!-----------------------------------------------------------------------!
-  WRITE(*,20) "===========================================================&
-               ====================="
-  WRITE(*,20) "Start to perform mesh overlapping..........................&
-               .................Done"
-  II_toOvrlp=II_PntLP
-  JJ_toOvrlp=JJ_PntLP
-  KK_toOvrlp=KK_PntLP
-  X_toOvrlp=X_Leap
-  Y_toOvrlp=Y_Leap
-  Z_toOvrlp=Z_Leap
-  n_PntToOvrlp=n_PointPre
-  IF (f_Ovrlp1Or2Dir==1) THEN
-  CALL perform_BlkOverlap1(1)
-  CALL output_Grid(II_PntOvrlp,JJ_PntOvrlp,KK_PntOvrlp,&
-                   X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
-  WRITE(*,20) "Overlap in I direction.....................................&
-               .................Done"
-  CALL perform_BlkOverlap1(2)
-  CALL output_Grid(II_PntOvrlp,JJ_PntOvrlp,KK_PntOvrlp,&
-                   X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
-  WRITE(*,20) "Overlap in J direction.....................................&
-               .................Done"
-  IF(cas_Dim=="3D") THEN
-    CALL perform_BlkOverlap1(3)
-    CALL output_Grid(II_PntOvrlp,JJ_PntOvrlp,KK_PntOvrlp,&
-                   X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
-  WRITE(*,20) "Overlap in K direction.....................................&
-               .................Done"
-  ENDIF
-  ELSEIF (f_Ovrlp1Or2Dir==2) THEN
-  CALL perform_BlkOverlap2()
-  CALL output_Grid(II_PntOvrlp,JJ_PntOvrlp,KK_PntOvrlp,&
-                   X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
-  WRITE(*,20) "Overlap in I direction.....................................&
-               .................Done"
-  CALL perform_BlkOverlap2(2)
-  CALL output_Grid(II_PntOvrlp,JJ_PntOvrlp,KK_PntOvrlp,&
-                   X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
-  WRITE(*,20) "Overlap in J direction.....................................&
-               .................Done"
-  IF(cas_Dim=="3D") THEN
-    CALL perform_BlkOverlap2(3)
-    CALL output_Grid(II_PntOvrlp,JJ_PntOvrlp,KK_PntOvrlp,&
-                   X_Overlap,Y_Overlap,Z_Overlap,"_OVRLP")
-  WRITE(*,20) "Overlap in K direction.....................................&
-               .................Done"
-  ENDIF
-  ENDIF
-!-----------------------------------------------------------------------!
-!   Perform mesh block splitting --- 2	    	 		        !
-!-----------------------------------------------------------------------!
-  WRITE(*,20) "===========================================================&
-               ====================="
-  WRITE(*,20) "Start to perform block splitting...........................&
-               ....................."
-  II_toSplit=II_PntOvrlp
-  JJ_toSplit=JJ_PntOvrlp
-  KK_toSplit=KK_PntOvrlp
-  X_toSplit=X_Overlap
-  Y_toSplit=Y_Overlap
-  Z_toSplit=Z_Overlap
-  CALL perform_BlkSplit
-ENDIF
+WRITE(*,20) "===========================================================&
+             ====================="
+WRITE(*,20) "Start to perform block splitting...........................&
+             ....................."
+II_toSplit=II_PntLP
+JJ_toSplit=JJ_PntLP
+KK_toSplit=KK_PntLP
+X_toSplit=X_Leap
+Y_toSplit=Y_Leap
+Z_toSplit=Z_Leap
+CALL perform_BlkSplit
 WRITE(*,20) "===========================================================&
              ====================="
 CALL write2plt
