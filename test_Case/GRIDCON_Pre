@@ -25,12 +25,12 @@
 ------10) Lv_OffUniform(*)=Lv_uniOffset(*)+Lv_coarsen(*),  which is the coarsening
 ------11) Lv based on Lv_Uniform(*)
 i_Blk	isid*1	2	3	4	5	6 Lv_offset(x)	(y)	(z) Lv_cs(x)	(y)	(z)
-1	4000	9000	7000	9000	0	0	0	0	0	0	0	0
-2	9000	9000	7000	9000	0	0	0	0	0	0	0	0
-3	9000	9000	7000	7000	0	0	0	0	0	0	0	0
-4	9000	9000	7000	7000	0	0	0	0	0	0	0	0
-5	9000	9000	7000	9000	0	0	0	0	0	0	0	0
-6	9000	4000	7000	9000	0	0	0	0	0	0	0	0
+1	4000	9000	3000	9000	0	0	0	0	0	0	0	0
+2	9000	9000	3000	9000	0	0	0	0	0	0	0	0
+3	9000	9000	3000	7000	0	0	0	0	0	0	0	0
+4	9000	9000	3000	7000	0	0	0	0	0	0	0	0
+5	9000	9000	3000	9000	0	0	0	0	0	0	0	0
+6	9000	4000	3000	9000	0	0	0	0	0	0	0	0
 7	4000	9000	9000	9000	0	0	0	0	0	0	0	0
 8	9000	9000	9000	9000	0	0	0	0	0	0	0	0
 9	9000	9000	7000	9000	0	0	0	0	0	0	0	0
@@ -55,7 +55,7 @@ II_Blk	JJ_Blk	KK_Blk
 #9----- flag of multi-time-step or not, flag_Mltstp=1: use multi-time-step
 	0
 #10---- No. CPUs plan to use, np.
-	30
+	20
 #11---- ratio_PointAftPre,ratio of array size between after processing and pre-processing
 	20
 #12---- flag of more split than initial balance or not, 1 = more split, 0 = no more

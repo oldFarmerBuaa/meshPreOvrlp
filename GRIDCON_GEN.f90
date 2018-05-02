@@ -22,8 +22,10 @@ ALLOCATE(min_LvOffUnfrmFnlLow2High(n_BlkFinal))
 ALLOCATE(var_In(n_BlkFinal),idx_Bubble(n_BlkFinal))
 ALLOCATE(n_PntFinalLow2High(n_BlkFinal))
 ALLOCATE(Lv_Recorded(n_BlkFinal))
+
+! Sort points on each block by bubble up method(0/1=no/yes)
 flag_SortByBubble=1
-flag_CalTmStpIdx=0
+
 DO J=1,n_BlkFinal
   WRITE(FILENAME,'(A10,I4.4)') "GRIDBLO_BC",J
   OPEN(30,FILE=FILENAME,STATUS="OLD")
@@ -141,31 +143,37 @@ ELSE
 ENDIF
 max_Proc=i_Proc
 !---------------------------------------------------------------------------!
+! Write GRIDCON file for calculation
 WRITE(FILENAME,'(A19)') "output_GRID/GRIDCON"
 OPEN(30,FILE=FILENAME,STATUS="UNKNOWN")
-IF(flag_CalTmStpIdx==1) THEN
-  WRITE(30,*) n_BlkFinal,Lv_Mltstp
-  DO J=1,n_BlkFinal
-    IF(cas_Dim=="2D") THEN
-      WRITE(30,100) J,II_Final(J),JJ_Final(J),idx_Proc(J),&
-                    n_PntFinal(J),idx_Mltstp(J)
-    ELSE
-      WRITE(30,100) J,II_Final(J),JJ_Final(J),KK_Final(J),&
-      idx_Proc(J),n_PntFinal(J),idx_Mltstp(J)
-    ENDIF
-  ENDDO
-ELSE ! Set all blocks have different time step scale
-  WRITE(30,*) n_BlkFinal,n_BlkFinal
-  DO J=1,n_BlkFinal
-    IF(cas_Dim=="2D") THEN
-      WRITE(30,100) J,II_Final(J),JJ_Final(J),idx_Proc(J),&
-                    n_PntFinal(J),J
-    ELSE
-      WRITE(30,100) J,II_Final(J),JJ_Final(J),KK_Final(J),&
-      idx_Proc(J),n_PntFinal(J),J
-    ENDIF
-  ENDDO
-ENDIF
+WRITE(30,*) n_BlkFinal,Lv_Mltstp
+DO J=1,n_BlkFinal
+  IF(cas_Dim=="2D") THEN
+    WRITE(30,100) J,II_Final(J),JJ_Final(J),idx_Proc(J),&
+                  n_PntFinal(J),idx_Mltstp(J)
+  ELSE
+    WRITE(30,100) J,II_Final(J),JJ_Final(J),KK_Final(J),&
+    idx_Proc(J),n_PntFinal(J),idx_Mltstp(J)
+  ENDIF
+ENDDO
+WRITE(30,*) "Total points:",n_PntFnlTot
+WRITE(30,*) "Total processors assigned:",max_Proc
+CLOSE(30)
+!---------------------------------------------------------------------------!
+! Write GRIDCON file for pre-processing to get exchange table
+! Set all blocks have different time step scale
+WRITE(FILENAME,'(A27)') "output_GRID/GRIDCON_EXCCTAB"
+OPEN(30,FILE=FILENAME,STATUS="UNKNOWN")
+WRITE(30,*) n_BlkFinal,n_BlkFinal
+DO J=1,n_BlkFinal
+  IF(cas_Dim=="2D") THEN
+    WRITE(30,100) J,II_Final(J),JJ_Final(J),idx_Proc(J),&
+                  n_PntFinal(J),J
+  ELSE
+    WRITE(30,100) J,II_Final(J),JJ_Final(J),KK_Final(J),&
+    idx_Proc(J),n_PntFinal(J),J
+  ENDIF
+ENDDO
 WRITE(30,*) "Total points:",n_PntFnlTot
 WRITE(30,*) "Total processors assigned:",max_Proc
 CLOSE(30)
