@@ -1,12 +1,15 @@
-#1------case dimension(cas_Dim):
+#1------case dimension                      :cas_Dim
 	2D
-#2------mesh type(mesh_Type):
+#2------mesh type                           :mesh_Type
 	cfx4
-#3------total super blocks(n_BlkSupPre):
+#3------total super blocks                  :n_BlkSupPre
 	1
-#4------number of original blocks in each super block:
+#4-1 ---number of original blocks in each super block:
 	i_BlkSupPre	n_Blk(i_BlkSupPre)
 	1		18
+#4-2 ---number of multi-time-step levels (can use No. boundary block layers as an alternative):
+	Lv_Mltstp
+	3
 #5------grid Levels of uniform mesh in each super block:
 	Super Block:1
 	Lv_uniform(x)	(y)	(z)
@@ -53,7 +56,7 @@ II_Blk	JJ_Blk	KK_Blk
 #8----- number of overlapping points: 3*2^max_LvDiff+3*2^Lv_CoarsenGlb<=6+6 due to max_LvDiff<=1 recommended.
 	12
 #9----- flag of multi-time-step or not, flag_Mltstp=1: use multi-time-step
-	0
+	1
 #10---- No. CPUs plan to use, np.
 	20
 #11---- ratio_PointAftPre,ratio of array size between after processing and pre-processing

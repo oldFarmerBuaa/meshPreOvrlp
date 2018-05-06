@@ -28,6 +28,8 @@ INTEGER i_PntPre,i_PntNow1,i_PntNow2
 INTEGER II,JJ,KK
 INTEGER isidtp_TmpPre(6),isidtp_TmpAft(6,2),isidtp_Aft(6)
 INTEGER Lv_OffUnfrmTmpPre(3),Lv_OffUnfrmTmpAft(3,2),Lv_OffUnfrmAft(3)
+INTEGER n_PntEqvLocTmp,n_PntEqvAft
+REAL(8) dt_Tmp,dt_Aft
 REAL(8),DIMENSION(:),ALLOCATABLE :: X_PreStp,Y_PreStp,Z_PreStp
 REAL(8),DIMENSION(:),ALLOCATABLE :: X_NowBlk_1,Y_NowBlk_1,Z_NowBlk_1
 REAL(8),DIMENSION(:),ALLOCATABLE :: X_NowBlk_2,Y_NowBlk_2,Z_NowBlk_2
@@ -51,6 +53,8 @@ IF(i_Split==1) THEN
   Z_PreStp(1:n_PntPreStp)=Z_toSplit(IJ_start:IJ_end,K)
   isidtp_TmpPre(1:6)=isidtp_Pre(1:6,J,K)
   Lv_OffUnfrmTmpPre(1:3)=Lv_OffUniform(1:3,J,K)
+  dt_Tmp=dt(J,K)
+  n_PntEqvLocTmp=n_PntEqvLoc(J,K)
 !  WRITE(*,*)"X_PreStp(1):",X_PreStp(1)
 !  WRITE(*,*)"X_PreStp(end):",X_PreStp(n_PntPreStp)
 ELSE
@@ -62,6 +66,8 @@ ELSE
     READ(30,*) (Lv_OffUnfrmTmpPre(I),I=1,3)
     READ(30,*)
     READ(30,*) (isidtp_TmpPre(I),I=1,6)
+    READ(30,*)
+    READ(30,*) dt_Tmp,n_PntEqvLocTmp
     READ(30,*)
     READ(30,*) JJ_PreStp,II_PreStp
     n_PntPreStp=II_PreStp*JJ_PreStp*KK_PreStp
@@ -114,6 +120,8 @@ isidtp_TmpAft(1:6,1)=isidtp_TmpPre(1:6)
 isidtp_TmpAft(1:6,2)=isidtp_TmpPre(1:6)
 Lv_OffUnfrmTmpAft(1:3,1)=Lv_OffUnfrmTmpPre(1:3)
 Lv_OffUnfrmTmpAft(1:3,2)=Lv_OffUnfrmTmpPre(1:3)
+dt_Aft=dt_Tmp
+n_PntEqvAft=n_PntEqvLocTmp/2
 IF(max_IJK_Loc==II_PreStp) THEN
 !  WRITE(*,20) "Split by I."
   mid_II=II_PreStp/2+1
@@ -199,7 +207,7 @@ DO i_K=st_K2,ed_K2
   ENDDO
 ENDDO
 !-----------------------------------------------------------------------!
-! Output interval and finale GRIDBLOCKS
+! Output interval and final GRIDBLOCKS
 IF(i_Split==n_Split(J,K)) THEN
 ! Last split, output final gird block
   II=II_NowBlk_1
@@ -209,8 +217,9 @@ IF(i_Split==n_Split(J,K)) THEN
   isidtp_Aft(1:6)=isidtp_TmpAft(1:6,1)
   Lv_OffUnfrmAft(1:3)=Lv_OffUnfrmTmpAft(1:3,1)
   CALL  function_Output_Grid(II,JJ,KK,i_BlkGlb,&
-        X_NowBlk_1,Y_NowBlk_1,Z_NowBlk_1,&
-        n_PntNowBlk1,isidtp_Aft,Lv_OffUnfrmAft)
+        X_NowBlk_1,Y_NowBlk_1,Z_NowBlk_1,      &
+        n_PntNowBlk1,isidtp_Aft,Lv_OffUnfrmAft,&
+        dt_Aft,n_PntEqvAft)
   II=II_NowBlk_2
   JJ=JJ_NowBlk_2
   KK=KK_NowBlk_2
@@ -218,8 +227,9 @@ IF(i_Split==n_Split(J,K)) THEN
   isidtp_Aft(1:6)=isidtp_TmpAft(1:6,2)
   Lv_OffUnfrmAft(1:3)=Lv_OffUnfrmTmpAft(1:3,2)
   CALL  function_Output_Grid(II,JJ,KK,i_BlkGlb,&
-        X_NowBlk_2,Y_NowBlk_2,Z_NowBlk_2,&
-        n_PntNowBlk2,isidtp_Aft,Lv_OffUnfrmAft)
+        X_NowBlk_2,Y_NowBlk_2,Z_NowBlk_2,      &
+        n_PntNowBlk2,isidtp_Aft,Lv_OffUnfrmAft,&
+        dt_Aft,n_PntEqvAft)
 ELSE
   i_BlkSplit1=i_BlkSplit*10+1
   i_BlkSplit2=i_BlkSplit*10+2
@@ -233,6 +243,8 @@ ELSE
     WRITE(30,*) (Lv_OffUnfrmTmpAft(I,1),I=1,3)
     WRITE(30,*) "Boundary Conditions:isidtp(1:6):"
     WRITE(30,*) (isidtp_TmpAft(I,1),I=1,6)
+    WRITE(30,*) "Reference dt and equivalent points n_PntEqv:"
+    WRITE(30,*) dt_Aft,n_PntEqvAft
     WRITE(30,*) "JJ,II and X(1:n),Y(1:n),Z(1:n):"
     WRITE(30,*) JJ_NowBlk_1,II_NowBlk_1
     WRITE(30,100) (X_NowBlk_1(i_I),i_I=1,n_PntNowBlk1)
@@ -244,6 +256,8 @@ ELSE
     WRITE(30,*) (Lv_OffUnfrmTmpAft(I,1),I=1,3)
     WRITE(30,*) "Boundary Conditions:isidtp(1:6):"
     WRITE(30,*) (isidtp_TmpAft(I,1),I=1,6)
+    WRITE(30,*) "Reference dt and equivalent points n_PntEqv:"
+    WRITE(30,*) dt_Aft,n_PntEqvAft
     WRITE(30,*) "KK,JJ,II and X(1:n),Y(1:n),Z(1:n):"
     WRITE(30,*) KK_NowBlk_1,JJ_NowBlk_1,II_NowBlk_1
     WRITE(30,100) (X_NowBlk_1(i_I),i_I=1,n_PntNowBlk1)
@@ -260,6 +274,8 @@ ELSE
     WRITE(30,*) (Lv_OffUnfrmTmpAft(I,2),I=1,3)
     WRITE(30,*) "Boundary Conditions:isidtp(1:6):"
     WRITE(30,*) (isidtp_TmpAft(I,2),I=1,6)
+    WRITE(30,*) "Reference dt and equivalent points n_PntEqv:"
+    WRITE(30,*) dt_Aft,n_PntEqvAft
     WRITE(30,*) "JJ,II and X(1:n),Y(1:n),Z(1:n):"
     WRITE(30,*) JJ_NowBlk_2,II_NowBlk_2
     WRITE(30,100) (X_NowBlk_2(i_I),i_I=1,n_PntNowBlk2)
@@ -271,6 +287,8 @@ ELSE
     WRITE(30,*) (Lv_OffUnfrmTmpAft(I,2),I=1,3)
     WRITE(30,*) "Boundary Conditions:isidtp(1:6):"
     WRITE(30,*) (isidtp_TmpAft(I,2),I=1,6)
+    WRITE(30,*) "Reference dt and equivalent points n_PntEqv:"
+    WRITE(30,*) dt_Aft,n_PntEqvAft
     WRITE(30,*) "KK,JJ,II and X(1:n),Y(1:n),Z(1:n):"
     WRITE(30,*) KK_NowBlk_2,JJ_NowBlk_2,II_NowBlk_2
     WRITE(30,100) (X_NowBlk_2(i_I),i_I=1,n_PntNowBlk2)
@@ -285,16 +303,17 @@ END
 !-----------------------------------------------------------------------!
 !   Output GRID blocks in splitting                                     !
 !-----------------------------------------------------------------------!
-SUBROUTINE function_Output_Grid(II,JJ,KK,i_BlkGlb,X,Y,Z,n_Point,isidtp_Output,Lv_OffUnfrmOutput)
+SUBROUTINE function_Output_Grid(II,JJ,KK,i_BlkGlb,X,Y,Z,n_Point,isidtp_Output,Lv_OffUnfrmOutput,dt_Aft,n_PntEqvAft)
 !
 USE READ_GRIDCON_Pre
 !
 IMPLICIT NONE
 INTEGER I,J,K,i_IJK,i_JIK
-INTEGER II,JJ,KK,i_BlkGlb,n_Point
+INTEGER II,JJ,KK,i_BlkGlb,n_Point,n_PntEqvAft
 INTEGER isidtp_Output(6),Lv_OffUnfrmOutput(3)
 REAL(8) X(n_Point),Y(n_Point),Z(n_Point)
 REAL(8) X_JIK(n_Point),Y_JIK(n_Point),Z_JIK(n_Point)
+REAL(8) dt_Aft
 CHARACTER(LEN=20) FILENAME1
 CHARACTER(LEN=50) FILENAME2
 
@@ -302,10 +321,6 @@ CHARACTER(LEN=50) FILENAME2
 23 FORMAT(A50,1X,I8,1X,I8,1X,I8)
 ! Second final output
 WRITE(FILENAME1,'(A10,I4.4)')"GRIDBLO_BC",i_BlkGlb
-! Final output in which grid point is arranged by 
-! i_Point=(K-1)*IMAX*JMAX+(I-1)*JMAX+J, TRANSFORM I-J-K TO J-I-K COUNT
-! 2DDNS CODE IS J-I-K
-WRITE(FILENAME2,'(A19,I3.3)')"output_GRID/GRIDBLO",i_BlkGlb
 IF(i_BlkGLb>999) CALL PSEXIT("n_BlkGlb>999, increase block name digit.")
 OPEN(30,FILE=FILENAME1,STATUS="UNKNOWN")
 IF(cas_Dim=="2D") THEN
@@ -319,12 +334,12 @@ IF(cas_Dim=="2D") THEN
   WRITE(30,*) (Lv_OffUnfrmOutput(I),I=1,3)
   WRITE(30,*) "Boundary Conditions:isidtp(1:6):"
   WRITE(30,*) (isidtp_Output(I),I=1,6)
+  WRITE(30,*) "Reference dt and equivalent points n_PntEqv:"
+  WRITE(30,*) dt_Aft,n_PntEqvAft
   WRITE(30,*) "JJ,II and X(1:n),Y(1:n):"
   WRITE(30,*) JJ,II
   WRITE(*,23) "Index of block after splitting:",i_BlkGlb
   WRITE(*,23) "Total points in this block:",n_Point
-!WRITE(*,*) "--------------------------------------&
-!            ----------------------------------------"
   WRITE(30,100) (X(I),I=1,n_Point)
   WRITE(30,100) (Y(I),I=1,n_Point)
 ELSE
@@ -338,6 +353,8 @@ ELSE
   WRITE(30,*) (Lv_OffUnfrmOutput(I),I=1,3)
   WRITE(30,*) "Boundary Conditions:isidtp(1:6):"
   WRITE(30,*) (isidtp_Output(I),I=1,6)
+  WRITE(30,*) "Reference dt and equivalent points n_PntEqv:"
+  WRITE(30,*) dt_Aft,n_PntEqvAft
   WRITE(30,*) "KK,JJ,II and X(1:n),Y(1:n),Z(1:n):"
   WRITE(30,*) KK,JJ,II
   WRITE(30,100) (X(I),I=1,n_Point)
@@ -356,6 +373,10 @@ DO K=1,KK
     ENDDO
   ENDDO
 ENDDO
+! Final output in which grid point is arranged by 
+! i_Point=(K-1)*IMAX*JMAX+(I-1)*JMAX+J, TRANSFORM I-J-K TO J-I-K COUNT
+! 2DDNS CODE IS J-I-K
+WRITE(FILENAME2,'(A19,I3.3)')"output_GRID/GRIDBLO",i_BlkGlb
 OPEN(30,FILE=FILENAME2,STATUS="UNKNOWN")
 IF(cas_Dim=="2D") THEN
   WRITE(30,*) II,JJ

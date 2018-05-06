@@ -47,9 +47,10 @@ REAL(8),DIMENSION(:,:),ALLOCATABLE :: np_LocReal
 23 FORMAT(A50,1X,I8,1X,I8,1X,I8)
 100   FORMAT(2F16.12)
 ALLOCATE(                    min_dxyz(n_BlkSupPre))
+ALLOCATE(   min_dxyzLoc(max_BlkGlbPre,n_BlkSupPre))
 ALLOCATE(                      min_dt(n_BlkSupPre))
-ALLOCATE(          dt(3,max_BlkGlbPre,n_BlkSupPre))
-ALLOCATE(      n_step(3,max_BlkGlbPre,n_BlkSupPre))
+ALLOCATE(            dt(max_BlkGlbPre,n_BlkSupPre))
+ALLOCATE(        n_Step(max_BlkGlbPre,n_BlkSupPre))
 ALLOCATE(   n_PntEqvLoc(max_BlkGlbPre,n_BlkSupPre))
 ALLOCATE(              n_PntEqvPreSwp(n_BlkSupPre))
 ALLOCATE(     np_LocInt(max_BlkGlbPre,n_BlkSupPre))
@@ -59,6 +60,7 @@ ALLOCATE(   np_Loc2nInt(max_BlkGlbPre,n_BlkSupPre))
 !-----------------------------------------------------------------------!
 ! Calculate the mininmum edge in each superblock
 min_dxyz=100.0
+min_dxyzLoc=100.0
 DO K=1,n_BlkSupPre
   i_PointPre=0
   DO J=1,n_BlkPre(K)
@@ -86,6 +88,9 @@ DO K=1,n_BlkSupPre
           ENDIF
           tmp_Real=MIN(dx,dy,dz)
           IF(cas_Dim=="2D") tmp_Real=MIN(dx,dy)
+          IF(tmp_Real<min_dxyzLoc(J,K)) THEN
+            min_dxyzLoc(J,K)=tmp_Real
+          ENDIF
           IF(tmp_Real<min_dxyz(K)) THEN
             min_dxyz(K)=tmp_Real
           ENDIF
@@ -102,34 +107,25 @@ DO K=1,n_BlkSupPre
       ENDDO
     ENDDO
     i_PointPre=i_Point
-!    WRITE(*,21) "No. points after this Blk:",i_PointPre
   ENDDO
-!  WRITE(*,*) "min_dxyz(K):",min_dxyz(K)
 ENDDO
 !-----------------------------------------------------------------------!
-!Calculate min dt and assign it to each block in superblock by Grid_Lv
+!Calculate dt and number of steps to march on for a unit time.
 CFL=1.D2
 n_Step=0
 min_OffUniformInSup=100
 ! Check if all elements become 0
 DO K=1,n_BlkSupPre
-  DO J=1,n_BlkPre(K)
-    DO I=1,3
-      IF(Lv_OffUniform(I,J,K)<min_OffUniformInSup) THEN
-        min_OffUniformInSup=Lv_OffUniform(I,J,K)
-      ENDIF
-    ENDDO
-  ENDDO
   min_dt(K)=CFL*min_dxyz(K)
-!  WRITE(*,*) "min_dt:",min_dt(K)
   DO J=1,n_BlkPre(K)
         IF(flag_Mltstp==1) THEN
-          Lv_DiffVsMin(1:3,J,K)=Lv_OffUniform(1:3,J,K)-min_OffUniformInSup
+          dt(J,K)=CFL*min_dxyzLoc(J,K)
+          WRITE(*,*) "Multi-time-step: dt = ", dt(J,K)
         ELSE
-          Lv_DiffVsMin(1:3,J,K)=0
+          dt(J,K)=min_dt(K)
+          IF(J==1) WRITE(*,*) "Single-time-step: dt = ", dt(J,K)
         ENDIF
-        dt(1:3,J,K)=2**Lv_DiffVsMin(1:3,J,K)*min_dt(K)
-        n_step(1:3,J,K)=1/dt(1:3,J,K)
+        n_Step(J,K)=1/dt(J,K)
   ENDDO
 ENDDO
 max_N_Step=MAXVAL(n_step)
@@ -142,22 +138,15 @@ n_PntEqvGlbPreSwp=0
 DO K=1,n_BlkSupPre
   DO J=1,n_BlkPre(K)
     n_PntInBlk(J,K)=II_toSplit(J,K)*JJ_toSplit(J,K)*KK_toSplit(J,K)
-!    IF(J==21) WRITE(*,23) "II/JJ/KK:",II_toSplit(J,K),JJ_toSplit(J,K),KK_toSplit(J,K)
-    DO I=1,3
-      tmp_Int=n_Step(I,J,K)*n_PntInBlk(J,K)/max_N_Step
-      IF(n_PntEqvLoc(J,K)<tmp_Int) THEN
-        n_PntEqvLoc(J,K)=tmp_Int
-      ENDIF
-    ENDDO
-    !Overlapping Points are neglected
-    WRITE(*,'(A13,I8.8,A29,I8)') "i_Block:",J,"n_PntEqvLoc(J,K):",n_PntEqvLoc(J,K)
+    n_PntEqvLoc(J,K)=n_PntInBlk(J,K)*REAL(n_Step(J,K))/REAL(max_N_Step)
+    WRITE(*,200) "i_Block:",J,"n_PntEqvLoc(J,K):",n_PntEqvLoc(J,K)
+200 FORMAT(A13,I8.8,A29,I8)
     n_PntEqvPreSwp(K)=n_PntEqvPreSwp(K)+n_PntEqvLoc(J,K)
-    !Assign zero to arrays in advance
   ENDDO
   n_PntEqvGlbPreSwp=n_PntEqvGlbPreSwp+n_PntEqvPreSwp(K)
 ENDDO
 avg_PntPerCpuPreSwp=n_PntEqvGlbPreSwp/np
-WRITE(*,21)"avg_PntPerCpuPreSwP:",avg_PntPerCpuPreSwp
+WRITE(*,21)"avg_PntPerCpuPreSwP(Equivalent):",avg_PntPerCpuPreSwp
 !-----------------------------------------------------------------------!
 ! Calculate total blocks after block splitting and do array allocation
 n_BlkGlbAftSplit=0
@@ -179,15 +168,17 @@ DO K=1,n_BlkSupPre
         n_Split(J,K)=n_Split(J,K)+1
       ENDDO
       IF(n_Split(J,K)>=4) THEN
-      IF(2**n_Split(J,K)-np_LocInt(J,K)>1.5*(2**(n_Split(J,K)-1)-np_LocInt(J,K))) &
-        n_Split(J,K)=n_Split(J,K)-1
+      IF(2**n_Split(J,K)-np_LocInt(J,K) >          &
+         1.5*(2**(n_Split(J,K)-1)-np_LocInt(J,K))) &
+         n_Split(J,K)=n_Split(J,K)-1
       ENDIF
       np_Loc2nInt(J,K)=2**n_Split(J,K)
       n_BlkGlbAftSplit=n_BlkGlbAftSplit+np_Loc2nInt(J,K)-1
     ENDIF
     IF(flag_MoreSplit==1) THEN
       n_Split(J,K)=n_Split(J,K)+n_MoreSplit
-      IF(n_Split(J,K)>6) CALL PSEXIT("No. Split larger than 6, decrease n_MoreSplit.")
+      IF(n_Split(J,K)>6) &
+        CALL PSEXIT("No. Split larger than 6, decrease n_MoreSplit.")
     ENDIF
   ENDDO
 ENDDO
@@ -229,8 +220,8 @@ DO K=1,n_BlkSupPre
       isidtp_Aft(1:6)=isidtp_Pre(1:6,J,K)
       Lv_OffUnfrmAft(1:3)=Lv_OffUniform(1:3,J,K)
       CALL function_Output_Grid(II,JJ,KK,i_BlkGlb,&
-            X_Out,Y_Out,Z_Out,n_toSplitLoc(J,K),&
-            isidtp_Aft,Lv_OffUnfrmAft)
+            X_Out,Y_Out,Z_Out,n_toSplitLoc(J,K),  &
+            isidtp_Aft,Lv_OffUnfrmAft,dt(J,K),n_PntEqvLoc(J,K))
       DEALLOCATE(X_Out,Y_Out,Z_Out)
     ENDIF
 !-----------------------------------------------------------------------!

@@ -71,24 +71,33 @@ END MODULE
 MODULE system_var
 IMPLICIT NONE
 INTEGER tmp_Int,tmp_Int1,tmp_Int2,tmp_Int3,CFL
-INTEGER ratio_PointAftPre,np,flag_Mltstp
-INTEGER n_BlkFinal,Lv_Mltstp,flag_CalTmStpIdx,n_PntFnlTot,max_Proc
+INTEGER ratio_PointAftPre,np,flag_Mltstp,n_BoundaryBlkLyr
+INTEGER n_BlkFinal,Lv_Mltstp,flag_CalTmStpIdx,n_PntFnlTot,n_PntEqvFnlTot,max_Proc
 REAL(8) tmp_Real,tmp_Real1,tmp_Real2,tmp_Real3
 CHARACTER(LEN=20) tmp_Char
 CHARACTER(LEN=18) LOGFILE
 CHARACTER(LEN=80) message
 CHARACTER(LEN=30) FILENAME
 INTEGER,DIMENSION(:),ALLOCATABLE :: II_Final,JJ_Final,KK_Final,n_PntFinal
+INTEGER,DIMENSION(:),ALLOCATABLE :: n_PntEqvFnl
 INTEGER,DIMENSION(:),ALLOCATABLE :: idx_Proc,idx_Mltstp
 INTEGER,DIMENSION(:,:),ALLOCATABLE :: Lv_OffUnfrmFnl,isidtp_Final
+REAL(8),DIMENSION(:),ALLOCATABLE :: dt_Final
 END MODULE
-! flag_Mltstp : flag of multi-time-step or not, flag_Mltstp=1: use multi-time-step
-! n_BlkFinal: Final No. blocks after all processing.
+! flag_Mltstp     : flag of multi-time-step or not, (0/1) = (no/yes)
+! n_BoundaryBlkLyr: Number of boundary layer blocks in origin mesh
+! n_BlkFinal      : Final No. blocks after all processing.
 ! flag_CalTmStpIdx: flag of calulate time step index of GRIDCON, 1 = yes, 0 = no
-! n_PntFnlTot : Total final points of all blocks
-! max_Proc : Max processor index assigned.
-! Lv_OffUnfrmFnl: (3,n_BlkFinal), Lv_OffUniform of final blocks.
-! isidtp_Final: (6,n_BlkFinal), boundary conditions of final blocks.
+! n_PntFnlTot     : Total final points of all blocks
+! n_PntEqvFnlTot  : Total final equivalent points of all blocks
+! max_Proc        : Max processor index assigned.a
+! n_PntFinal      : Number of points in final grid, n_PntFinal(J)
+! n_PntEqvFnl     : Numnber of equivalent points in final grid, for balance.
+! Lv_OffUnfrmFnl  : (3,n_BlkFinal), Lv_OffUniform of final blocks.
+! isidtp_Final    : (6,n_BlkFinal), boundary conditions of final blocks.
+! dt_Final        : Reference time step in each block dt_Final(J)
+
+
 !-----------------------------------------------------------------------!
 ! Block point leaping
 MODULE point_leaping
@@ -139,12 +148,12 @@ MODULE block_splitting
 IMPLICIT NONE
 INTEGER max_N_Step,flag_MoreSplit,n_MoreSplit
 INTEGER,DIMENSION(:,:),ALLOCATABLE :: n_PntEqvLoc,n_toSplitLoc
-INTEGER,DIMENSION(:,:),ALLOCATABLE :: n_Split
-INTEGER,DIMENSION(:,:,:),ALLOCATABLE :: n_step,Lv_DiffVsMin
+INTEGER,DIMENSION(:,:),ALLOCATABLE :: n_Split,n_step
 INTEGER,DIMENSION(:,:),ALLOCATABLE :: II_toSplit,JJ_toSplit,KK_toSplit
 REAL(8),DIMENSION(:),ALLOCATABLE :: min_dxyz,min_dt
-REAL(8),DIMENSION(:,:,:),ALLOCATABLE :: dt
+REAL(8),DIMENSION(:,:),ALLOCATABLE :: dt
 REAL(8),DIMENSION(:,:),ALLOCATABLE :: X_toSplit,Y_toSplit,Z_toSplit
+REAL(8),DIMENSION(:,:),ALLOCATABLE :: min_dxyzLoc
 INTEGER,PARAMETER :: n_PntOvrlpInSplit=6
 END MODULE
 ! max_N_Step : max No. steps needed to march to Time = 1 among all n_step
@@ -153,8 +162,9 @@ END MODULE
 ! n_PntEqvLoc: Equivalent points in each block n_PntEqvLoc(J,K)
 ! n_toSplitLoc: local No. points in block (J,K)
 ! n_Split    : No. split in each block n_Split(J,K)
-! n_step     : No. steps in each block needed to march to Time = 1, n_step(1:3,J,K)
+! n_step     : No. steps in each block needed to march to Time = 1, n_step(J,K)
 ! Lv_DiffVsMin: Lv_Diff vs min Lv 
 ! min_dxyz   : min dxyz in each super block min_dxyz(K)
 ! min_dt     : min dt in each super block min_dt(K)
-! dt         : dt of each block dt(1:3,J,K)
+! dt         : dt of each block dt(J,K)
+! min_dxyzLoc: min dxyz in each block min_dxyzLoc(J,K)

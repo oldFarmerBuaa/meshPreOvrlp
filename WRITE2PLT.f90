@@ -26,6 +26,8 @@ do imb=1,mb
   read(10,*)
   read(10,*)
   read(10,*)
+  read(10,*)
+  read(10,*)
   read(10,*) jmax,imax
   ijmax=imax*jmax
   allocate (x(ijmax),y(ijmax))

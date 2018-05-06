@@ -37,23 +37,27 @@ OPEN(10,FILE="GRIDCON_Pre",STATUS="OLD")
 !-----------------------------------------------------------------------!
 !   Read GRIDCON_Pre for total blocks in each sup-block			!
 !-----------------------------------------------------------------------!
+!#1 Case dimension(cas_Dim):
 READ(10,*) 
 READ(10,*) cas_Dim
+!#2 Mesh type(mesh_Type):
 READ(10,*) 
 READ(10,*) mesh_Type
+!#3 Total super blocks(n_BlkSupPre):
 READ(10,*) 
 READ(10,*) n_BlkSupPre 
 WRITE(*,21) "Number of super blocks: ",n_BlkSupPre
+!#4-1 Number of original blocks in each super block:
 READ(10,*) 
 READ(10,*) 
-!-----------------------------------------------------------------------!
-! Allocate global arrays
 ALLOCATE(                      n_BlkPre(n_BlkSupPre))
 n_BlkGlbPre=0
 DO K=1,n_BlkSupPre
   READ(10,*) tmp_Int,n_BlkPre(K)
   n_BlkGlbPre=n_BlkGlbPre+n_BlkPre(K)
 ENDDO
+!-----------------------------------------------------------------------!
+! Allocate global arrays
 max_BlkGlbPre=MAXVAL(n_BlkPre)
 ! BC values,1:6 for 3D
 ! Lv_OffUniform = Lv_OffSet + Lv_Coarsen
@@ -79,7 +83,6 @@ ALLOCATE(     Lv_OffSet(3,max_BlkGlbPre,n_BlkSupPre))
 ALLOCATE(    Lv_Coarsen(3,max_BlkGlbPre,n_BlkSupPre))
 ALLOCATE( Lv_OffUniform(3,max_BlkGlbPre,n_BlkSupPre))
 ALLOCATE(Lv_OffUniformTot(max_BlkGlbPre,n_BlkSupPre))
-ALLOCATE(  Lv_DiffVsMin(3,max_BlkGlbPre,n_BlkSupPre))
 ALLOCATE(          II_Pre(max_BlkGlbPre,n_BlkSupPre))
 ALLOCATE(          JJ_Pre(max_BlkGlbPre,n_BlkSupPre))
 ALLOCATE(          KK_Pre(max_BlkGlbPre,n_BlkSupPre))
@@ -98,9 +101,14 @@ ALLOCATE(     KK_PntOvrlp(max_BlkGlbPre,n_BlkSupPre))
 ALLOCATE(      II_toSplit(max_BlkGlbPre,n_BlkSupPre))
 ALLOCATE(      JJ_toSplit(max_BlkGlbPre,n_BlkSupPre))
 ALLOCATE(      KK_toSplit(max_BlkGlbPre,n_BlkSupPre))
+!#4-2 Number of multi-time-step levels (can use No. boundary block layers as an alternative):
+READ(10,*)
+READ(10,*)
+READ(10,*) Lv_Mltstp
 !-----------------------------------------------------------------------!
 !   Read GRIDCON_Pre for BCs in each block				!
 !-----------------------------------------------------------------------!
+!#5-1 Grid Levels of uniform mesh in each super block:
 READ(10,*)
 DO I=1,n_BlkSupPre
   READ(10,*)
@@ -108,9 +116,10 @@ DO I=1,n_BlkSupPre
   READ(10,*) Lv_Uniform(1,I),Lv_Uniform(2,I),Lv_Uniform(3,I)
 ENDDO
 !-----------------------------------------------------------------------!
-!#14- No. Level of global coarsen, Lv_CoarsenGlb
+!#5-2 No. Level of global coarsen, Lv_CoarsenGlb
 READ(10,*)
 READ(10,*) Lv_CoarsenGlb
+!#6 Boundary conditions and grid-level offsets of wall blocks & grid-coarsen
 DO I=1,11
   READ(10,*)
 ENDDO
@@ -132,7 +141,7 @@ ENDDO
 min_LvOffUniformTot=MINVAL(Lv_OffUniformTot)
 !WRITE(*,21) "MIN LvOffUniformTot in this superblock:",min_LvOffUniformTot
 !-----------------------------------------------------------------------!
-!#7- Reading index of block matrix of super block
+!#7 Reading index of block matrix of super block
 READ(10,*)
 READ(10,*)
 READ(10,*)
@@ -145,27 +154,27 @@ DO K=1,n_BlkSupPre
               II_Blk(K),JJ_Blk(K),KK_Blk(K)
 ENDDO
 !-----------------------------------------------------------------------!
-!#8- Reading number of overlapping points
+!#8 Reading number of overlapping points
 READ(10,*)
 READ(10,*) n_PointOverlap
 !-----------------------------------------------------------------------!
-!#9- flag of multi-time-step or not, flag_Mltstp=1: use multi-time-step
+!#9 flag of multi-time-step or not, flag_Mltstp=1: use multi-time-step
 READ(10,*)
 READ(10,*) flag_Mltstp
 !-----------------------------------------------------------------------!
-!#10- No. CPUs plan to use, np.
+!#10 No. CPUs plan to use, np.
 READ(10,*)
 READ(10,*) np
 !-----------------------------------------------------------------------!
-!#11- Ratio of array size between after processing and pre-processing
+!#11 Ratio of array size between after processing and pre-processing
 READ(10,*)
 READ(10,*) ratio_PointAftPre
 !-----------------------------------------------------------------------!
-!#12- lag of more split than initial balance or not, 1 = more split, 0 = no more
+!#12 lag of more split than initial balance or not, 1 = more split, 0 = no more
 READ(10,*)
 READ(10,*) flag_MoreSplit
 !-----------------------------------------------------------------------!
-!#13- No. of extra splits activated by flag_MoreSplit=1.
+!#13 No. of extra splits activated by flag_MoreSplit=1.
 READ(10,*)
 READ(10,*) n_MoreSplit
 CLOSE(10)
